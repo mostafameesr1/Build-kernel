@@ -19,6 +19,7 @@ jobs:
         sudo apt update -y
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl curl lz4 -y
         sudo aptitude install libssl-dev -y
+        
     - name: Fetch toolchains
       run: |
         mkdir toolchains
@@ -33,6 +34,22 @@ jobs:
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-gnu-
+
+        export KBUILD_BUILD_USER="rsuntk"
+        export KBUILD_BUILD_HOST="rsuntk_orgs"
+
+        # do some checks
+        echo ""
+        echo ====================================
+        echo CROSS_COMPILE=$CROSS_COMPILE
+        echo CLANG=`clang -v`
+        echo CLANG_TRIPLE=$CLANG_TRIPLE
+        echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
+        echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
+        echo CURRENT_DIR=$(pwd)
+        echo ====================================
+        echo ""
+        
         curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         bash $(pwd)/build_kernel.sh
       working-directory: android_kernel_samsung_a12s
