@@ -27,6 +27,11 @@ jobs:
         git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
         git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
       working-directory: android_kernel_samsung_a12s
+
+    - name: Prepare timezone fix
+      run: |
+        sudo rm /etc/localtime
+        sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
     - name: Build kernel
       id: buildKernel
@@ -47,6 +52,7 @@ jobs:
         echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
+        echo DATE=`date`
         echo ====================================
         echo ""
         
