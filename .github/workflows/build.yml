@@ -8,7 +8,9 @@ on:
         required: true
       LLVM:
         description: LLVM compiling
-        required: true
+        type: boolean
+      GOOGLE:
+        description: Use Google toolchains instead of proton-clang
         type: boolean
         
 jobs:
@@ -33,9 +35,12 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        #git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-        #git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
-        git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
+        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
+          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
+          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
+        else
+          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
+        fi
       working-directory: android_kernel_samsung_a12s
 
     - name: Prepare timezone fix
@@ -45,10 +50,13 @@ jobs:
       
     - name: Build kernel
       run: |
-        #export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-        #export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
-        export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
+        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
+          export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
+          export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+        else
+          export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
+          export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
+        endif
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
