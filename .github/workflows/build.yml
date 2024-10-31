@@ -10,6 +10,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: rsuntkOrgs/android_kernel_samsung_a12s
+        ref: android-4.19-stable
         path: android_kernel_samsung_a12s
         show-progress: false
         fetch-depth: 1
