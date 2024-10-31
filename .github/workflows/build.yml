@@ -81,7 +81,7 @@ jobs:
         echo ====================================================
         echo ""
         
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        #curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
