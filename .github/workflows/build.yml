@@ -87,7 +87,7 @@ jobs:
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
-        mv out/.config config.txt && cp out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3/Image
+        mv out/.config config.txt
       working-directory: android_kernel_samsung_a12s
       
     - name: Upload config
@@ -107,6 +107,7 @@ jobs:
         TITLE: Kernel
       run: |
         if [ ! -z "${{ secrets.CHAT_ID }}" ] && [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+          cp $GITHUB_WORKSPACE/android_kernel_samsung_a12s/out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3
           export VERSION=$(git rev-list --count HEAD)
           zipName="A127F_UC-${{ github.sha }}.zip"
           cd $GITHUB_WORKSPACE/AnyKernel3 && zip -r9 ../$zipName *
