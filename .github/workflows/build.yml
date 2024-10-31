@@ -87,7 +87,7 @@ jobs:
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
-        mv out/.config config.txt && mv out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3/Image
+        mv out/.config config.txt && cp out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3/Image
       working-directory: android_kernel_samsung_a12s
       
     - name: Upload config
