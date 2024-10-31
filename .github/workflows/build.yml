@@ -12,6 +12,9 @@ on:
       GOOGLE:
         description: Use Google toolchains instead of proton-clang
         type: boolean
+      UPLOAD_TG:
+        description: Upload it to telegram
+        type: boolean
         
 jobs:
   build:
@@ -84,13 +87,34 @@ jobs:
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
+        mv out/.config config.txt && mv out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3/Image
       working-directory: android_kernel_samsung_a12s
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
         name: CONFIG
-        path: android_kernel_samsung_a12s/out/.config
+        path: android_kernel_samsung_a12s/out/config.txt
+        
+    - name: Upload to telegram
+      if: github.events.input.UPLOAD_TG == true
+      env:
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        COMMIT_URL: ${{ github.event.head_commit.url }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        TITLE: Kernel
+      run: |
+        if [ ! -z "${{ secrets.CHAT_ID }}" ] && [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+          export VERSION=$(git rev-list --count HEAD)
+          zipName="A127F_UC-${{ github.sha }}.zip"
+          cd $GITHUB_WORKSPACE/AnyKernel3 && zip -r9 ../$zipName *
+          bash $GITHUB_WORKSPACE/.github/scripts/upload_handler.sh $GITHUB_WORKSPACE/$zipName
+        else
+          echo "Telegram bot token is undefined, please add it to repository secrets!"
+          exit 1
+        fi
         
     - name: Upload .gz
       uses: actions/upload-artifact@v4
