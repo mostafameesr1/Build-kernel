@@ -59,7 +59,7 @@ jobs:
         else
           export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
           export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
-        endif
+        fi
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
@@ -81,7 +81,7 @@ jobs:
         echo ====================================================
         echo ""
         
-        #curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
