@@ -1,11 +1,15 @@
 name: Build Kernel
 on:
   workflow_dispatch:
+    inputs:
+      DEFCONFIG:
+        description: 'defconfig'
+        default: 'rsuntk_defconfig'
+        required: true
         
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: TG
     steps:
     - uses: actions/checkout@v4
       with:
@@ -49,21 +53,32 @@ jobs:
 
         # do some checks
         echo ""
-        echo ====================================
+        echo ====================================================
         echo CROSS_COMPILE=$CROSS_COMPILE
-        echo CLANG=`clang -v`
+        echo DEFCONFIG="${{ inputs.DEFCONFIG }}"
+        echo CLANG=`clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
         echo CLANG_TRIPLE=$CLANG_TRIPLE
         echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
-        echo ====================================
+        echo ====================================================
         echo ""
         
         curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-        bash $(pwd)/build_kernel.sh
+        bash $(pwd)/build_kernel.sh ${{ inputs.DEFCONFIG }}
+        echo ""
+        echo "===================================================="
+        strings out/arch/arm64/boot/Image | grep "Linux version"
+        echo "===================================================="
       working-directory: android_kernel_samsung_a12s
       
+    - name: Upload config
+      uses: actions/upload-artifact@v4
+      with:
+        name: CONFIG
+        path: android_kernel_samsung_a12s/out/.config
+        
     - name: Upload .gz
       uses: actions/upload-artifact@v4
       with:
