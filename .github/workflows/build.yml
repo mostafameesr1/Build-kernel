@@ -3,9 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       DEFCONFIG:
-        description: 'defconfig'
+        description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
+      LLVM:
+        description: LLVM compiling
+        required: true
+        type: boolean
         
 jobs:
   build:
@@ -40,13 +44,14 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
     - name: Build kernel
-      id: buildKernel
       run: |
         #export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         #export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
         export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
+        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
+        export LLVM_STATE="${{ github.event.inputs.LLVM }}"
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
@@ -55,7 +60,7 @@ jobs:
         echo ""
         echo ====================================================
         echo CROSS_COMPILE=$CROSS_COMPILE
-        echo DEFCONFIG="${{ inputs.DEFCONFIG }}"
+        echo DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         echo CLANG=`clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
         echo CLANG_TRIPLE=$CLANG_TRIPLE
         echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
@@ -66,7 +71,7 @@ jobs:
         echo ""
         
         curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-        bash $(pwd)/build_kernel.sh ${{ inputs.DEFCONFIG }}
+        bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
