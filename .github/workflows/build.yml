@@ -4,16 +4,10 @@ on:
     inputs:
       DEFCONFIG:
         description: Defconfig
-        default: 'rsuntk_defconfig'
+        default: 'a04_defconfig'
         required: true
       LLVM:
-        description: LLVM compiling
-        type: boolean
-      GOOGLE:
-        description: Use Google toolchains instead of proton-clang
-        type: boolean
-      UPLOAD_TG:
-        description: Upload it to telegram
+        description: LLVM compiling (optional)
         type: boolean
         
 jobs:
@@ -22,9 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_a12s
+        repository: rsuntkOrgs/android_kernel_samsung_a04
         ref: android-4.19-stable
-        path: android_kernel_samsung_a12s
+        path: android_kernel_samsung_a04
         show-progress: false
         fetch-depth: 1
         
@@ -38,13 +32,9 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
-        else
-          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
-        fi
-      working-directory: android_kernel_samsung_a12s
+        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
+        git clone --depth=1 https://github.com/VH-Devices/toolchains.git -b gcc-10.3.0 gcc-10
+      working-directory: android_kernel_samsung_a04
 
     - name: Prepare timezone fix
       run: |
@@ -53,19 +43,11 @@ jobs:
       
     - name: Build kernel
       run: |
-        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
-          export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
-        else
-          export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
-        fi
+        export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
+        export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
-
-        export KBUILD_BUILD_USER="rsuntk"
-        export KBUILD_BUILD_HOST="rsuntk_orgs"
 
         # do some checks
         echo ""
@@ -78,51 +60,31 @@ jobs:
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
-        echo UPLOAD_2_TG="${{ github.event.inputs.UPLOAD_TG }}"
         echo ====================================================
         echo ""
         
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        #curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
+        lz4 -d boot.img.lz4 && sudo chmod +x ./magiskboot && ./magiskboot unpack boot.img && rm kernel && cp out/arch/arm64/boot/Image $(pwd)/kernel && magiskboot repack boot.img boot-custkern.img
         mv out/.config out/build_config.txt
-      working-directory: android_kernel_samsung_a12s
+      working-directory: android_kernel_samsung_a04
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
         name: CONFIG
-        path: android_kernel_samsung_a12s/out/build_config.txt
-        
-    - name: Upload to telegram
-      if: github.events.input.UPLOAD_TG == true
-      env:
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        COMMIT_URL: ${{ github.event.head_commit.url }}
-        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        TITLE: Kernel
-      run: |
-        if [ ! -z "${{ secrets.CHAT_ID }}" ] && [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-          cp $GITHUB_WORKSPACE/android_kernel_samsung_a12s/out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3
-          export VERSION=$(git rev-list --count HEAD)
-          zipName="A127F_UC-${{ github.sha }}.zip"
-          cd $GITHUB_WORKSPACE/AnyKernel3 && zip -r9 ../$zipName *
-          bash $GITHUB_WORKSPACE/.github/scripts/upload_handler.sh $GITHUB_WORKSPACE/$zipName
-        else
-          echo "Telegram bot token is undefined, please add it to repository secrets!"
-          exit 1
-        fi
+        path: android_kernel_samsung_a04/out/build_config.txt
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: A127F-Build
+        name: A045F-Build
         path: |
-          android_kernel_samsung_a12s/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/samsung/*.dtbo
-          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/exynos/*.dtb
+          android_kernel_samsung_a04/out/arch/arm64/boot/*.gz
+          android_kernel_samsung_a04/*.img
+          android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
