@@ -72,12 +72,13 @@ jobs:
         echo ====================================================
         echo CROSS_COMPILE=$CROSS_COMPILE
         echo DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        echo CLANG=`clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
+        echo CLANG="`clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`"
         echo CLANG_TRIPLE=$CLANG_TRIPLE
         echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
+        echo UPLOAD_2_TG="${{ github.event.inputs.UPLOAD_TG }}"
         echo ====================================================
         echo ""
         
@@ -87,14 +88,14 @@ jobs:
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
-        mv out/.config config.txt
+        mv out/.config out/build_config.txt
       working-directory: android_kernel_samsung_a12s
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
         name: CONFIG
-        path: android_kernel_samsung_a12s/out/config.txt
+        path: android_kernel_samsung_a12s/out/build_config.txt
         
     - name: Upload to telegram
       if: github.events.input.UPLOAD_TG == true
@@ -117,8 +118,11 @@ jobs:
           exit 1
         fi
         
-    - name: Upload .gz
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Image-gz
-        path: android_kernel_samsung_a12s/out/arch/arm64/boot/*.gz
+        name: A127F-Build
+        path: |
+          android_kernel_samsung_a12s/out/arch/arm64/boot/*.gz
+          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/samsung/*.dtbo
+          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/exynos/*.dtb
