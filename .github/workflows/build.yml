@@ -69,13 +69,6 @@ jobs:
         echo "===================================================="
         #strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
-        lz4 -d boot.img.lz4
-        sudo chmod +x ./magiskboot
-        ./magiskboot unpack boot.img
-        rm kernel
-        cp out/arch/arm64/boot/Image $(pwd)/kernel
-        ./magiskboot repack boot.img boot-custkern.img
-        rm boot.img
         mv out/.config out/build_config.txt
       working-directory: android_kernel_samsung_a04
       
@@ -91,5 +84,5 @@ jobs:
         name: A045F-Build
         path: |
           android_kernel_samsung_a04/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a04/*.img
+          android_kernel_samsung_a04/Publishing/*.img
           android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
