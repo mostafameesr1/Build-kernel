@@ -98,7 +98,7 @@ jobs:
           android_kernel_samsung_a05/out/arch/arm64/boot/*.gz
           android_kernel_samsung_a05/out/arch/arm64/boot/dts/mediatek/*.dtb
 
-    - name: Upload artifacts
+    - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
         name: A055F-AnyKernel3
