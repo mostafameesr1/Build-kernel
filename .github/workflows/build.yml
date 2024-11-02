@@ -92,4 +92,3 @@ jobs:
         name: A045F-Kernel-ci
         path: |
           android_kernel_samsung_a04/AnyKernel3/*
-          android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
