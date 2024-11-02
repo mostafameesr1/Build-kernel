@@ -6,14 +6,8 @@ on:
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
-      LLVM:
-        description: LLVM compiling
-        type: boolean
       GOOGLE:
         description: Use Google toolchains instead of proton-clang
-        type: boolean
-      UPLOAD_TG:
-        description: Upload it to telegram
         type: boolean
         
 jobs:
@@ -22,9 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_a12s
-        ref: android-4.19-stable
-        path: android_kernel_samsung_a12s
+        repository: rsuntkOrgs/android_kernel_samsung_a05
+        ref: upstream
+        path: android_kernel_samsung_a05
         show-progress: false
         fetch-depth: 1
         
@@ -40,11 +34,11 @@ jobs:
         cd toolchains
         if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
+          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
         else
           git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
         fi
-      working-directory: android_kernel_samsung_a12s
+      working-directory: android_kernel_samsung_a05
 
     - name: Prepare timezone fix
       run: |
@@ -55,14 +49,13 @@ jobs:
       run: |
         if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+          export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         else
           export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
           export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
         fi
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export LLVM_STATE="${{ github.event.inputs.LLVM }}"
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
@@ -89,40 +82,25 @@ jobs:
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
         mv out/.config out/build_config.txt
-      working-directory: android_kernel_samsung_a12s
+      working-directory: android_kernel_samsung_a05
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
         name: CONFIG
-        path: android_kernel_samsung_a12s/out/build_config.txt
-        
-    - name: Upload to telegram
-      if: github.events.input.UPLOAD_TG == true
-      env:
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        COMMIT_URL: ${{ github.event.head_commit.url }}
-        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        TITLE: Kernel
-      run: |
-        if [ ! -z "${{ secrets.CHAT_ID }}" ] && [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-          cp $GITHUB_WORKSPACE/android_kernel_samsung_a12s/out/arch/arm64/boot/Image $GITHUB_WORKSPACE/AnyKernel3
-          export VERSION=$(git rev-list --count HEAD)
-          zipName="A127F_UC-${{ github.sha }}.zip"
-          cd $GITHUB_WORKSPACE/AnyKernel3 && zip -r9 ../$zipName *
-          bash $GITHUB_WORKSPACE/.github/scripts/upload_handler.sh $GITHUB_WORKSPACE/$zipName
-        else
-          echo "Telegram bot token is undefined, please add it to repository secrets!"
-          exit 1
-        fi
+        path: android_kernel_samsung_a05/out/build_config.txt
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: A127F-Build
+        name: A055F-Build
         path: |
-          android_kernel_samsung_a12s/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/samsung/*.dtbo
-          android_kernel_samsung_a12s/out/arch/arm64/boot/dts/exynos/*.dtb
+          android_kernel_samsung_a05/out/arch/arm64/boot/*.gz
+          android_kernel_samsung_a05/out/arch/arm64/boot/dts/mediatek/*.dtb
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: A055F-AnyKernel3
+        path: |
+          android_kernel_samsung_a05/AnyKernel3/*
