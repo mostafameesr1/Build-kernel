@@ -84,5 +84,12 @@ jobs:
         name: A045F-Build
         path: |
           android_kernel_samsung_a04/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a04/Publishing/*.img
+          android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
+          
+    - name: Upload AnyKernel3
+      uses: actions/upload-artifact@v4
+      with:
+        name: A045F-Kernel-ci
+        path: |
+          android_kernel_samsung_a04/AnyKernel3/*
           android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
