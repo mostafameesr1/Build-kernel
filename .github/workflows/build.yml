@@ -64,12 +64,12 @@ jobs:
         echo ====================================================
         echo ""
         
-        #curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
-        #strings out/arch/arm64/boot/Image | grep "Linux version"
+        strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
         mv out/.config out/build_config.txt
       working-directory: android_kernel_samsung_a04
