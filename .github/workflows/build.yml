@@ -47,6 +47,8 @@ jobs:
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
+        export KBUILD_BUILD_HOST="rsuntk_orgs"
+        export KBUILD_BUILD_USER="nova_agatha"
 
         # do some checks
         echo ""
