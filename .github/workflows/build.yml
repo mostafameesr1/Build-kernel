@@ -9,6 +9,9 @@ on:
       LLVM:
         description: LLVM compiling (optional)
         type: boolean
+      SETUP_KSU:
+        description: KernelSU support (optional)
+        type: boolean
         
 jobs:
   build:
@@ -64,7 +67,10 @@ jobs:
         echo ====================================================
         echo ""
         
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
+        export KERNELSU=true
+        fi
+
         rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
         bash $(pwd)/build_kernel.sh
         echo ""
