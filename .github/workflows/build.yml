@@ -51,7 +51,7 @@ jobs:
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
-        export KBUILD_BUILD_USER="nova_agatha"
+        export KBUILD_BUILD_USER="rsuntk"
 
         # do some checks
         echo ""
@@ -68,10 +68,10 @@ jobs:
         echo ""
         
         if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
-        export KERNELSU=true
+          export KERNELSU=true
         fi
 
-        rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
+        #rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
