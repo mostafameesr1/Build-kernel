@@ -43,7 +43,13 @@ jobs:
       run: |
         sudo rm /etc/localtime
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-      
+    
+    - name: Setup ssh
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+          ssh-private-key: |
+            ${{ secrets.PRIVATE_KEY }}
+          
     - name: Build kernel
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
@@ -72,7 +78,8 @@ jobs:
           export KERNELSU=true
         fi
 
-        #rm -rf $(pwd)/drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module.git --depth=1 connectivity && cd ../../..
+        git clone git@github.com:rsuntk/mtk_connectivity_module.git -b setup --depth=1 setup_conn
+        cd setup_conn && mv setup.sh ../ && bash setup.sh
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
