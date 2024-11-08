@@ -43,12 +43,6 @@ jobs:
       run: |
         sudo rm /etc/localtime
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-    
-    - name: Setup ssh
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-          ssh-private-key: |
-            ${{ secrets.PRIVATE_KEY }}
           
     - name: Build kernel
       run: |
@@ -78,7 +72,7 @@ jobs:
           export KERNELSU=true
         fi
 
-        git clone git@github.com:rsuntk/mtk_connectivity_module.git -b setup --depth=1 setup_conn
+        git clone https://${{ secrets.PAT }}@github.com/rsuntk/mtk_connectivity_module.git -b setup --depth=1 setup_conn
         cd setup_conn && mv setup.sh ../ && bash setup.sh
         bash $(pwd)/build_kernel.sh
         echo ""
