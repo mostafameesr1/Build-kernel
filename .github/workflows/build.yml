@@ -45,6 +45,8 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
           
     - name: Build kernel
+      env:
+        PAT: ${{ secrets.PAT }}
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
