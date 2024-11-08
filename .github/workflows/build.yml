@@ -75,7 +75,7 @@ jobs:
         fi
 
         git clone https://${{ secrets.PAT }}@github.com/rsuntk/mtk_connectivity_module.git -b setup --depth=1 setup_conn
-        cd setup_conn && mv setup.sh ../ && bash setup.sh
+        cd setup_conn && mv setup.sh ../setup.sh && bash $(pwd)/setup.sh
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
