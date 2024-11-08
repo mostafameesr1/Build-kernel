@@ -45,8 +45,6 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
           
     - name: Build kernel
-      env:
-        PAT: ${{ secrets.PAT }}
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
@@ -73,9 +71,7 @@ jobs:
         if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
           export KERNELSU=true
         fi
-
-        git clone https://${{ secrets.PAT }}@github.com/rsuntk/mtk_connectivity_module.git -b setup --depth=1 setup_conn
-        bash $(pwd)/setup_conn/setup.sh
+        
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
