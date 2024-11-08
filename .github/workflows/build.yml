@@ -45,7 +45,7 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
     
     - name: Setup ssh
-      uses: webfactory/ssh-agent@v0.5.4
+      uses: webfactory/ssh-agent@v0.9.0
       with:
           ssh-private-key: |
             ${{ secrets.PRIVATE_KEY }}
