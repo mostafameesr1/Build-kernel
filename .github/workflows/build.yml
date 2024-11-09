@@ -49,6 +49,7 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
     - name: Build kernel
+      id: buildKernel
       run: |
         if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
