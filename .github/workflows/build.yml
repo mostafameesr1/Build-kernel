@@ -8,7 +8,7 @@ on:
         required: true
       BRANCH:
         description: Branch
-        default: '-'
+        default: ''
         required: true
       GOOGLE:
         description: Use Google toolchains instead of proton-clang
@@ -67,6 +67,7 @@ jobs:
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
+        export DEVICE=A055X
 
         # do some checks
         echo ""
