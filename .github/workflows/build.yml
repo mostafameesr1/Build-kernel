@@ -4,7 +4,7 @@ on:
     inputs:
       DEFCONFIG:
         description: Defconfig
-        default: 'a04_defconfig'
+        default: 'rsuntk_defconfig'
         required: true
       LLVM:
         description: LLVM compiling (optional)
@@ -45,6 +45,7 @@ jobs:
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
           
     - name: Build kernel
+      id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
@@ -72,24 +73,29 @@ jobs:
           export KERNELSU=true
         fi
         
+        export DEVICE=A045F
+        export TARGET_PRODUCT=a04
+        
         bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
         mv out/.config out/build_config.txt
+        gitsha1=$(git rev-parse --short HEAD)
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: android_kernel_samsung_a04
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
-        name: CONFIG
+        name: Config-${{ steps.buildKernel.outputs.buildDetails }}
         path: android_kernel_samsung_a04/out/build_config.txt
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: A045F-Build
+        name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           android_kernel_samsung_a04/out/arch/arm64/boot/*.gz
           android_kernel_samsung_a04/out/arch/arm64/boot/dts/mediatek/*.dtb
@@ -97,6 +103,6 @@ jobs:
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
-        name: A045F-Kernel-ci
+        name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           android_kernel_samsung_a04/AnyKernel3/*
