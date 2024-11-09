@@ -79,6 +79,8 @@ jobs:
         echo ====================================================
         echo ""
         
+        export DEVICE=A127F
+        
         curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
         bash $(pwd)/build_kernel.sh
         echo ""
@@ -86,18 +88,20 @@ jobs:
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
         mv out/.config out/build_config.txt
+        gitsha1=$(git rev-parse --short HEAD)
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: android_kernel_samsung_a12s
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
-        name: CONFIG
+        name: Config-${{ steps.buildKernel.outputs.buildDetails }}
         path: android_kernel_samsung_a12s/out/build_config.txt
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: A127F-Build
+        name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           android_kernel_samsung_a12s/out/arch/arm64/boot/*.gz
           android_kernel_samsung_a12s/out/arch/arm64/boot/dts/samsung/*.dtbo
@@ -106,5 +110,5 @@ jobs:
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
-        name: A127F-AnyKernel3
+        name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: android_kernel_samsung_a12s/AnyKernel3/*
