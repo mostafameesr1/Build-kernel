@@ -18,6 +18,10 @@ on:
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
+      KBUILD_USER:
+        description: Kbuild user
+        default: 'rsuntk'
+        required: true
       LLVM:
         description: LLVM compiling (optional)
         type: boolean
@@ -65,7 +69,7 @@ jobs:
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export LLVM_STATE="${{ github.event.inputs.LLVM }}"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
-        export KBUILD_BUILD_USER="rsuntk"
+        export KBUILD_BUILD_USER="${{ github.event.inputs.KBUILD_USER }}"
 
         # do some checks
         echo ""
