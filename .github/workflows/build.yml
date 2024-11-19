@@ -57,7 +57,7 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.GOOGLE }}" != "true" ]]; then
+        if [[ "${{ github.event.inputs.CLANG_NINETEEN }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         else
           export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
