@@ -10,8 +10,8 @@ on:
         description: Branch
         default: ''
         required: true
-      GOOGLE:
-        description: Use Google toolchains instead of proton-clang
+      CLANG_NINETEEN:
+        description: Use clang 19
         type: boolean
       KSU:
         description: Add KernelSU support
@@ -32,19 +32,21 @@ jobs:
     - name: Prepare dependencies
       run: |
         sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl curl lz4 -y
+        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
         sudo aptitude install libssl-dev -y
         
     - name: Fetch toolchains
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.GOOGLE }} == "true" ]]; then
+        if [[ ${{ github.event.inputs.CLANG_NINETEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
         else
-          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git
+          mkdir clang-19 && cd clang-19
+          wget -O clang19.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r536225.tar.gz
+          tar -xvf clang19.tar.gz && rm clang19.tar.gz && cd ..
         fi
+        git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: android_kernel_samsung_a05
 
     - name: Prepare timezone fix
@@ -55,13 +57,12 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.GOOGLE }}" = "true" ]]; then
+        if [[ "${{ github.event.inputs.GOOGLE }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         else
-          export PATH=$(pwd)/toolchains/proton-clang/bin:$PATH
-          export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
+          export PATH=$(pwd)/toolchains/clang-19/bin:$PATH
         fi
+        export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
 
