@@ -44,7 +44,7 @@ jobs:
         else
           mkdir clang-18 && cd clang-18
           wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
-          tar -xvf clang18.tar.gz && rm clang18.tar.gz && cd ..
+          tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
         git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: android_kernel_samsung_a05
