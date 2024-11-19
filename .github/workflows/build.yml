@@ -11,7 +11,7 @@ on:
         default: ''
         required: true
       CLANG_NINETEEN:
-        description: Use clang 19
+        description: Use clang 18
         type: boolean
       KSU:
         description: Add KernelSU support
@@ -42,9 +42,9 @@ jobs:
         if [[ ${{ github.event.inputs.CLANG_NINETEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
         else
-          mkdir clang-19 && cd clang-19
-          wget -q -O clang19.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r536225.tar.gz
-          tar -xvf clang19.tar.gz && rm clang19.tar.gz && cd ..
+          mkdir clang-18 && cd clang-18
+          wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
+          tar -xvf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
         git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: android_kernel_samsung_a05
@@ -60,9 +60,9 @@ jobs:
         if [[ "${{ github.event.inputs.GOOGLE }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         else
-          export PATH=$(pwd)/toolchains/clang-19/bin:$PATH
+          export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
         fi
-        export CROSS_COMPILE=$(pwd)/toolchains/proton-clang/bin/aarch64-linux-gnu-
+        export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
 
