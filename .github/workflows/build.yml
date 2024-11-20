@@ -6,11 +6,20 @@ on:
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
+      LTO:
+        description: 'Link Time Optimisations'
+        required: true
+        default: none
+        type: choice
+        options:
+        - none
+        - thin
+        - full
       BRANCH:
         description: Branch
         default: ''
         required: true
-      CLANG_NINETEEN:
+      CLANG_EIGHTEEN:
         description: Use clang 18
         type: boolean
       KSU:
@@ -39,7 +48,7 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.CLANG_NINETEEN }} != "true" ]]; then
+        if [[ ${{ github.event.inputs.CLANG_EIGHTEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
         else
           mkdir clang-18 && cd clang-18
@@ -57,7 +66,7 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.CLANG_NINETEEN }}" != "true" ]]; then
+        if [[ "${{ github.event.inputs.CLANG_EIGHTEEN }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         else
           export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
@@ -69,6 +78,7 @@ jobs:
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
         export DEVICE=A055X
+        export LTO="${{ github.event.inputs.LTO }}"
 
         # do some checks
         echo ""
@@ -81,8 +91,8 @@ jobs:
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
+        echo LTO=$LTO
         echo KERNELSU="${{ github.event.inputs.KSU }}"
-        echo UPLOAD_2_TG="${{ github.event.inputs.UPLOAD_TG }}"
         echo ====================================================
         echo ""
         
@@ -97,7 +107,7 @@ jobs:
         echo "===================================================="
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
-        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: android_kernel_samsung_a05
       
     - name: Upload config
