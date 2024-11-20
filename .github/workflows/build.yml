@@ -22,8 +22,14 @@ on:
         description: Kbuild user
         default: 'rsuntk'
         required: true
+      CLANG_NINETEEN:
+        description: Use clang 18 (optional)
+        type: boolean
       LLVM:
-        description: LLVM compiling (optional)
+        description: Use LLVM=1 (optional)
+        type: boolean
+      LLVM_IAS:
+        description: Use LLVM_IAS=1 (optional)
         type: boolean
       SETUP_KSU:
         description: KernelSU support (optional)
@@ -51,7 +57,13 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
+        if [[ ${{ github.event.inputs.CLANG_NINETEEN }} != "true" ]]; then
+          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
+        else
+          mkdir clang-18 && cd clang-18
+          wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
+          tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
+        fi
         git clone --depth=1 https://github.com/VH-Devices/toolchains.git -b gcc-10.3.0 gcc-10
       working-directory: android_kernel_samsung_${{ github.event.inputs.DEVICE_TARGET }}
 
@@ -63,11 +75,16 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
+        if [[ "${{ github.event.inputs.CLANG_NINETEEN }}" != "true" ]]; then
+          export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
+        else
+          export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
+        fi
         export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export LLVM_STATE="${{ github.event.inputs.LLVM }}"
+        export COMPILE_WITH_LLVM="${{ github.event.inputs.LLVM }}"
+        export COMPILE_WITH_IAS="${{ github.event.inputs.LLVM_IAS }}"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
         export KBUILD_BUILD_USER="${{ github.event.inputs.KBUILD_USER }}"
 
@@ -83,6 +100,8 @@ jobs:
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
         echo TARGET_DEVICE="${{ github.event.inputs.DEVICE_TARGET }}"
+        echo LLVM=$COMPILE_WITH_LLVM
+        echo LLVM_IAS=$COMPILE_WITH_IAS
         echo ====================================================
         echo ""
         
@@ -104,7 +123,7 @@ jobs:
         echo "===================================================="
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
-        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: android_kernel_samsung_${{ github.event.inputs.DEVICE_TARGET }}
       
     - name: Upload config
