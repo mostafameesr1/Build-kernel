@@ -6,15 +6,6 @@ on:
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
-      LTO:
-        description: 'Link Time Optimisations'
-        required: true
-        default: none
-        type: choice
-        options:
-        - none
-        - thin
-        - full
       BRANCH:
         description: Branch
         default: ''
@@ -78,7 +69,6 @@ jobs:
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
         export DEVICE=A055X
-        export LTO="${{ github.event.inputs.LTO }}"
 
         # do some checks
         echo ""
@@ -91,7 +81,6 @@ jobs:
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
-        echo LTO=$LTO
         echo KERNELSU="${{ github.event.inputs.KSU }}"
         echo ====================================================
         echo ""
