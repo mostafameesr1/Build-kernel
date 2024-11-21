@@ -53,9 +53,6 @@ jobs:
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl curl lz4 -y
         sudo aptitude install libssl-dev -y
         
-    - name: Copy build script
-      run: cp $GITHUB_WORKSPACE/scripts/build_kernel.sh /home/runner/work/Builder/Builder/android_kernel_samsung_${{ github.event.inputs.DEVICE_TARGET }}
-        
     - name: Fetch toolchains
       run: |
         mkdir toolchains
