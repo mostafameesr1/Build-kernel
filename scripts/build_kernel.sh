@@ -47,6 +47,7 @@ export ANDROID_MAJOR_VERSION=u
 export PLATFORM_VERSION=14
 
 export KCFLAGS=-w
+export KBUILD_CFLAGS=-Wno-deprecated-declarations
 export CONFIG_SECTION_MISMATCH_WARN_ONLY=y
 
 DATE=$(date +'%Y%m%d%H%M%S')
@@ -62,7 +63,7 @@ if [ -d $(pwd)/drivers/misc/mediatek/connectivity/bt ]; then
 fi
 
 # Make flags
-MKFLAG="-C $(pwd) --jobs $JOBS O=$KERNEL_OUT CC=clang LD=ld.lld KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y"
+MKFLAG="-C $(pwd) --jobs $JOBS O=$KERNEL_OUT CC=clang LD=ld.lld KCFLAGS=-w KBUILD_CFLAGS=-Wno-deprecated-declarations CONFIG_SECTION_MISMATCH_WARN_ONLY=y"
 
 if [[ $COMPILE_WITH_LLVM = "true" ]]; then
 	pr_info "Compiling with LLVM.."
