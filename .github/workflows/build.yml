@@ -22,7 +22,7 @@ on:
         description: Kbuild user
         default: 'rsuntk'
         required: true
-      CLANG_NINETEEN:
+      CLANG_EIGHTEEN:
         description: Use clang 18 (optional)
         type: boolean
       LLVM:
@@ -53,11 +53,14 @@ jobs:
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl curl lz4 -y
         sudo aptitude install libssl-dev -y
         
+    - name: Copy build script
+      run: cp $GITHUB_WORKSPACE/scripts/build_kernel.sh /home/runner/work/Builder/Builder/android_kernel_samsung_${{ github.event.inputs.DEVICE_TARGET }}
+        
     - name: Fetch toolchains
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.CLANG_NINETEEN }} != "true" ]]; then
+        if [[ ${{ github.event.inputs.CLANG_EIGHTEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
         else
           mkdir clang-18 && cd clang-18
@@ -75,7 +78,7 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.CLANG_NINETEEN }}" != "true" ]]; then
+        if [[ "${{ github.event.inputs.CLANG_EIGHTEEN }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         else
           export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
@@ -116,7 +119,7 @@ jobs:
         	export DEVICE=A042F
         fi
         
-        cp $GITHUB_WORKSPACE/scripts/build_kernel.sh $(pwd) && bash $(pwd)/build_kernel.sh
+        bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
