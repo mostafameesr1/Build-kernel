@@ -87,7 +87,6 @@ jobs:
         echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
-        echo TARGET_DEVICE="m32"
         echo ====================================================
         echo ""
         
@@ -118,7 +117,7 @@ jobs:
       with:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
-          android_kernel_samsung_m32/out/arch/arm64/boot/*.gz-dtb
+          android_kernel_samsung_m32/out/arch/arm64/boot/*.gz
           android_kernel_samsung_m32/out/arch/arm64/boot/dts/mediatek/*.dtb
           
     - name: Upload AnyKernel3
