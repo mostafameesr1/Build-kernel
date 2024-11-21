@@ -80,6 +80,7 @@ jobs:
         else
           export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
         fi
+        
         export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
@@ -87,6 +88,7 @@ jobs:
         export COMPILE_WITH_IAS="${{ github.event.inputs.LLVM_IAS }}"
         export KBUILD_BUILD_HOST="rsuntk_orgs"
         export KBUILD_BUILD_USER="${{ github.event.inputs.KBUILD_USER }}"
+        export IS_CI=true
 
         # do some checks
         echo ""
@@ -117,6 +119,7 @@ jobs:
         fi
         
         bash $(pwd)/build_kernel.sh
+        
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
