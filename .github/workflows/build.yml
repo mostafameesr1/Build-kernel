@@ -116,7 +116,7 @@ jobs:
         	export DEVICE=A042F
         fi
         
-        bash $(pwd)/build_kernel.sh
+        cp $GITHUB_WORKSPACE/scripts/build_kernel.sh $(pwd) && bash $(pwd)/build_kernel.sh
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
