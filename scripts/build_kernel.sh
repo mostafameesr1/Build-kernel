@@ -104,8 +104,11 @@ fi
 if [ -e $IMAGE ]; then
 	pr_info "Build done."
 	if [ -d $(pwd)/AnyKernel3 ]; then
+		if [ ! -z $DEVICE ]; then
+			DEVICE_MODEL="`echo $DEVICE`-"
+		fi
 		cp $IMAGE AnyKernel3/
-		cd AnyKernel3 && zip -r6 ../`echo $DEVICE_MODEL`-AnyKernel3_`echo $DATE`.zip *
+		cd AnyKernel3 && zip -r6 ../`echo $DEVICE_MODEL`AnyKernel3_`echo $DATE`.zip *
 	 	if [[ $IS_CI != "true" ]]; then
 	  		rm Image && cd ..
 		fi
